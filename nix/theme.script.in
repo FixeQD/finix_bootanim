@@ -1,0 +1,89 @@
+FRAME_W = @frameWidth@;
+FRAME_H = Math.Int(FRAME_W * 9 / 16);
+INTRO_END = @introEnd@;
+LOOP_END = @loopEnd@;
+LAST = @frames@ - 1;
+STEP = 1.2;
+OUTRO_ON = @outroOn@;
+
+sw = Window.GetWidth();
+sh = Window.GetHeight();
+
+scale = Math.Max(sw / FRAME_W, sh / FRAME_H);
+img_w = Math.Int(FRAME_W * scale);
+img_h = Math.Int(FRAME_H * scale);
+off_x = Math.Int((sw - img_w) / 2);
+off_y = Math.Int((sh - img_h) / 2);
+
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+
+fun frame_name(n) {
+    s = "" + n;
+    if (n < 10) s = "000" + n;
+    else if (n < 100) s = "00" + n;
+    else if (n < 1000) s = "0" + n;
+    return "frame_" + s + ".png";
+}
+
+fun load_frame(n) {
+    img = Image(frame_name(n));
+    if (scale != 1) img = img.Scale(img_w, img_h);
+    return img;
+}
+
+screen = Sprite(load_frame(0));
+screen.SetPosition(off_x, off_y, 0);
+
+tick = 0.0;
+shown = 0;
+outro = 0;
+outro_requested = 0;
+
+fun refresh() {
+    tick += STEP;
+    if (outro == 0 && tick >= LOOP_END) {
+        if (outro_requested) outro = 1;
+        else tick = INTRO_END + (tick - LOOP_END);
+    }
+    if (tick > LAST) tick = LAST;
+    n = Math.Int(tick);
+    if (n != shown) {
+        screen.SetImage(load_frame(n));
+        shown = n;
+    }
+}
+Plymouth.SetRefreshFunction(refresh);
+
+fun message(text) {
+    if (text == OUTRO_ON) outro_requested = 1;
+}
+Plymouth.SetMessageFunction(message);
+
+prompt = Sprite();
+prompt.SetPosition(0, 0, 100);
+
+fun show_prompt(text) {
+    img = Image.Text(text, 1, 1, 1, 1);
+    prompt.SetImage(img);
+    prompt.SetPosition(Math.Int((sw - img.GetWidth()) / 2), Math.Int(sh * 0.85), 100);
+    prompt.SetOpacity(1);
+}
+
+fun display_normal() {
+    prompt.SetOpacity(0);
+}
+
+fun display_password(text, bullets) {
+    dots = "";
+    for (i = 0; i < bullets; i++) dots += "*";
+    show_prompt(text + "  " + dots);
+}
+
+fun display_question(text, entry) {
+    show_prompt(text + "  " + entry);
+}
+
+Plymouth.SetDisplayNormalFunction(display_normal);
+Plymouth.SetDisplayPasswordFunction(display_password);
+Plymouth.SetDisplayQuestionFunction(display_question);
