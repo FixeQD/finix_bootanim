@@ -1,0 +1,23 @@
+[package]
+name = "finix_bootanim"
+version = "0.1.0"
+edition = "2024"
+description = "Renders the Finix boot animation to PNG frames"
+
+[dependencies]
+bezier_easing = { version = "0.3", default-features = false }
+clap = { version = "4", default-features = false, features = ["derive", "std"] }
+eros = { version = "0.8", default-features = false }
+fs-err = { version = "3", default-features = false }
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp"] }
+indicatif = { version = "0.18", default-features = false, features = ["rayon"] }
+rayon = { version = "1", default-features = false }
+tiny-skia = { version = "0.12", default-features = false, features = ["std", "png-format"] }
+usvg = { version = "0.49", default-features = false }
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
